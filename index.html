@@ -1,184 +1,355 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
-    <meta name="description" content="Küllerimden Tekrar Doğarım">
-    <title>Küllerimden Tekrar Doğarım</title>
-    <style>
-        /* CSS BÖLÜMÜ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>m.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Syne:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000;
-        }
+    :root {
+      --accent: #e8d5b0;
+      --text: #f5f0e8;
+      --sub: rgba(245,240,232,0.55);
+    }
 
-        /* Arka Plan Canvası */
-        #background-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
-        }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
 
-        /* Ana İçerik */
-        main {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            pointer-events: none; /* Mouse hareketini canvas algılasın diye */
-        }
+    /* ── ENTRY ── */
+    #entry {
+      position: fixed; inset: 0; z-index: 200;
+      background: #000;
+      cursor: pointer;
+      transition: opacity 1.3s ease, visibility 1.3s ease;
+    }
+    #entry.gone { opacity: 0; visibility: hidden; pointer-events: none; }
 
-        #main-text {
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 2.5rem;
-            font-weight: 200;
-            letter-spacing: 10px;
-            text-transform: uppercase;
-            text-align: center;
-            user-select: none;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-        }
+    /* ── VIDEO ── */
+    #vid {
+      position: fixed; inset: 0; z-index: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 2s ease;
+    }
+    #vid.on { opacity: 1; }
 
-        /* Footer */
-        footer {
-            position: fixed;
-            bottom: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            z-index: 3;
-        }
+    #veil {
+      position: fixed; inset: 0; z-index: 1;
+      background:
+        radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.4) 100%),
+        linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.62) 100%);
+      pointer-events: none;
+    }
 
-        footer a {
-            color: rgba(255, 255, 255, 0.5);
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
+    /* ── VOL ── */
+    #volbtn {
+      position: fixed; top: 1.4rem; right: 1.4rem; z-index: 50;
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(14px);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.7s, background 0.3s;
+    }
+    #volbtn.on { opacity: 1; }
+    #volbtn:hover { background: rgba(255,255,255,0.12); }
+    #volbtn svg { width: 15px; height: 15px; stroke: var(--text); fill: none; stroke-width: 1.6; }
 
-        footer a:hover {
-            color: #ff5e00;
-            transform: scale(1.2);
-        }
+    /* ── SOCIALS ── */
+    #socials {
+      position: fixed;
+      bottom: 2.2rem; left: 0; right: 0;
+      z-index: 40;
+      display: flex; justify-content: center; align-items: center;
+      gap: 0.7rem;
+      opacity: 0; transition: opacity 1.3s ease 0.7s;
+    }
+    #socials.on { opacity: 1; }
 
-        @media (max-width: 768px) {
-            #main-text {
-                font-size: 1.3rem;
-                letter-spacing: 5px;
-            }
-        }
-    </style>
+    .s-btn {
+      display: flex; align-items: center; gap: 0.42rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: var(--sub);
+      padding: 0.56rem 1.3rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(16px);
+      cursor: pointer;
+      text-decoration: none;
+      border-radius: 1px;
+      transition: color 0.3s, border-color 0.3s, background 0.3s;
+      white-space: nowrap;
+    }
+    .s-btn svg { width: 13px; height: 13px; flex-shrink: 0; transition: transform 0.3s; }
+    .s-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.26); background: rgba(0,0,0,0.48); }
+    .s-btn:hover svg { transform: scale(1.18); }
+
+    .sep { width: 1px; height: 11px; background: rgba(255,255,255,0.13); }
+
+    /* ── TELEGRAM DROPDOWN ── */
+    .tg-wrap { position: relative; }
+
+    .tg-menu {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      width: 230px;
+      background: rgba(6,6,6,0.88);
+      backdrop-filter: blur(28px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 2px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
+      overflow: hidden;
+    }
+    .tg-wrap.open .tg-menu {
+      opacity: 1; visibility: visible; pointer-events: all;
+      transform: translateX(-50%) translateY(0);
+    }
+    .tg-menu::after {
+      content: '';
+      position: absolute;
+      bottom: -5px; left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 8px; height: 8px;
+      background: rgba(6,6,6,0.88);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* scrollable list area */
+    .tg-scroll {
+      max-height: 320px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+    .tg-scroll::-webkit-scrollbar { width: 3px; }
+    .tg-scroll::-webkit-scrollbar-track { background: transparent; }
+    .tg-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+    .tg-section-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.46rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.22);
+      padding: 0.55rem 1.1rem 0.2rem;
+    }
+    .tg-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.25rem 0; }
+
+    .tg-item {
+      display: flex; align-items: center; gap: 0.55rem;
+      padding: 0.52rem 1.1rem;
+      text-decoration: none;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sub);
+      white-space: nowrap;
+      transition: color 0.22s, background 0.22s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tg-item:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .tg-item svg { width: 11px; height: 11px; flex-shrink: 0; opacity: 0.6; }
+    .tg-item.account { color: rgba(232,213,176,0.7); }
+    .tg-item.account:hover { color: var(--accent); }
+
+    /* ── KEYFRAMES ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      #socials { bottom: 1.3rem; gap: 0.45rem; }
+      .s-btn { padding: 0.5rem 0.9rem; font-size: 0.54rem; letter-spacing: 0.28em; }
+      .tg-menu { width: 210px; }
+    }
+  </style>
 </head>
 <body>
 
-    <canvas id="background-canvas"></canvas>
-    
-    <main>
-        <h1 id="main-text">Küllerimden Tekrar Doğarım</h1>
-    </main>
-    
-    <footer>
-        <a href="https://instagram.com/2xles" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
+<!-- ENTRY - tamamen boş, tıklayınca giriş -->
+<div id="entry" onclick="go()"></div>
+
+<!-- VIDEO -->
+<video id="vid" playsinline loop></video>
+<div id="veil"></div>
+
+<!-- VOL -->
+<button id="volbtn" onclick="toggleMute()">
+  <svg id="ico-on" viewBox="0 0 24 24">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+  </svg>
+  <svg id="ico-off" viewBox="0 0 24 24" style="display:none">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <line x1="23" y1="9" x2="17" y2="15"/>
+    <line x1="17" y1="9" x2="23" y2="15"/>
+  </svg>
+</button>
+
+<!-- SOCIALS -->
+<div id="socials">
+
+  <!-- Instagram -->
+  <a class="s-btn" href="https://instagram.com/illahiyet" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5">
+      <rect x="2" y="2" width="20" height="20" rx="5"/>
+      <circle cx="12" cy="12" r="4"/>
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+    </svg>
+    Instagram
+  </a>
+
+  <div class="sep"></div>
+
+  <!-- Telegram -->
+  <div class="tg-wrap" id="tgWrap">
+    <button class="s-btn" onclick="toggleTg(event)">
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5">
+        <path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/>
+      </svg>
+      Telegram ▾
+    </button>
+
+    <div class="tg-menu" id="tgMenu">
+      <div class="tg-scroll">
+
+        <!-- ── HESAP ── -->
+        <p class="tg-section-label">Hesabım</p>
+        <a class="tg-item account" href="https://t.me/v99ls" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          @hesabim
         </a>
-    </footer>
 
-    <script>
-        // JS BÖLÜMÜ
-        document.addEventListener("DOMContentLoaded", () => {
-            const canvas = document.getElementById('background-canvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
+        <div class="tg-divider"></div>
 
-            const colors = {
-                black: { r: 0, g: 0, b: 0 },
-                darkRed: { r: 85, g: 25, b: 25 },
-                darkBlue: { r: 20, g: 30, b: 70 },
-                orange: { r: 190, g: 95, b: 45 }
-            };
+        <!-- ── KANALLAR ── -->
+        <p class="tg-section-label">Kanallarım</p>
 
-            let mouseX = 0.5;
-            let mouseY = 0.5;
-            let currentColor = { r: 0, g: 0, b: 0 };
-            let targetColor  = { r: 0, g: 0, b: 0 };
+        <a class="tg-item" href="https://t.me/m3rny" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_1
+        </a>
 
-            function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
+        <a class="tg-item" href="https://t.me/illahiyet" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_2
+        </a>
 
-            function lerpColor(c1, c2, f) {
-                return {
-                    r: c1.r + (c2.r - c1.r) * f,
-                    g: c1.g + (c2.g - c1.g) * f,
-                    b: c1.b + (c2.b - c1.b) * f
-                };
-            }
+        <a class="tg-item" href="https://t.me/illahinizim" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_3
+        </a>
 
-            function updateTargetColor() {
-                const topColor = lerpColor(colors.black, colors.darkBlue, mouseX);
-                const bottomColor = lerpColor(colors.darkRed, colors.orange, mouseX);
-                targetColor = lerpColor(topColor, bottomColor, mouseY);
-            }
+        <a class="tg-item" href="https://t.me/metaAdsManager" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_4
+        </a>
 
-            function draw() {
-                currentColor.r += (targetColor.r - currentColor.r) * 0.05;
-                currentColor.g += (targetColor.g - currentColor.g) * 0.05;
-                currentColor.b += (targetColor.b - currentColor.b) * 0.05;
+        <a class="tg-item" href="https://t.me/MeryemKalbim" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_5
+        </a>
 
-                const r = Math.floor(currentColor.r);
-                const g = Math.floor(currentColor.g);
-                const b = Math.floor(currentColor.b);
+        <a class="tg-item" href="https://t.me/PubgmKlips" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_6
+        </a>
 
-                const cx = canvas.width * mouseX;
-                const cy = canvas.height * mouseY;
-                const radius = Math.max(canvas.width, canvas.height) * 0.8;
+        <a class="tg-item" href="https://t.me/lavente1994" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_7
+        </a>
 
-                const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-                grad.addColorStop(0, `rgba(${Math.min(255, r+30)}, ${Math.min(255, g+30)}, ${Math.min(255, b+30)}, 0.4)`);
-                grad.addColorStop(0.3, `rgb(${r}, ${g}, ${b})`);
-                grad.addColorStop(1, `rgb(${Math.max(0, r-20)}, ${Math.max(0, g-20)}, ${Math.max(0, b-20)})`);
+        <a class="tg-item" href="https://t.me/afganistan1938" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_8
+        </a>
+          
+          <a class="tg-item" href="https://t.me/CakalStore" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_9
+        </a>
 
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                requestAnimationFrame(draw);
-            }
+        <a class="tg-item" href="https://t.me/ahlaksizarsiv" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_10
+        </a>
 
-            window.addEventListener('mousemove', e => {
-                mouseX = e.clientX / window.innerWidth;
-                mouseY = e.clientY / window.innerHeight;
-                updateTargetColor();
-            });
+        <a class="tg-item" href="https://t.me/nosecondus" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_11
+        </a>
 
-            window.addEventListener('deviceorientation', e => {
-                if (e.gamma !== null && e.beta !== null) {
-                    mouseX = Math.max(0, Math.min(1, (e.gamma + 90) / 180));
-                    mouseY = Math.max(0, Math.min(1, (e.beta + 90) / 180));
-                    updateTargetColor();
-                }
-            });
+        <a class="tg-item" href="https://t.me/flexshakecc" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M21.19 3.4 2.8 10.57c-1.3.5-1.28 1.2-.23 1.52l4.65 1.45 10.78-6.8c.51-.31.98-.14.6.2L8.31 16.1l-.35 4.9c.51 0 .74-.23 1.02-.5l2.45-2.37 4.8 3.54c.88.49 1.52.24 1.74-.82L21.97 4.8c.32-1.28-.49-1.86-1.78-1.4z"/></svg>
+          @kanal_12
+        </a>
 
-            window.addEventListener('resize', resizeCanvas);
-            resizeCanvas();
-            updateTargetColor();
-            draw();
-        });
-    </script>
+      </div><!-- /tg-scroll -->
+    </div><!-- /tg-menu -->
+  </div><!-- /tg-wrap -->
+
+</div><!-- /socials -->
+
+<script>
+  const VIDEOS = ['aslarr.mp4', 'yinyang.mp4'];
+  const vid     = document.getElementById('vid');
+  const volBtn  = document.getElementById('volbtn');
+  const socials = document.getElementById('socials');
+  const icoOn   = document.getElementById('ico-on');
+  const icoOff  = document.getElementById('ico-off');
+  const tgWrap  = document.getElementById('tgWrap');
+
+  vid.src = VIDEOS[Math.floor(Math.random() * VIDEOS.length)];
+
+  function go() {
+    document.getElementById('entry').classList.add('gone');
+    vid.muted = false;
+    vid.volume = 0.7;
+    vid.play().catch(() => { vid.muted = true; vid.play(); });
+    vid.classList.add('on');
+    socials.classList.add('on');
+    volBtn.classList.add('on');
+  }
+
+  function toggleMute() {
+    vid.muted = !vid.muted;
+    icoOn.style.display  = vid.muted ? 'none' : '';
+    icoOff.style.display = vid.muted ? '' : 'none';
+  }
+
+  function toggleTg(e) {
+    e.stopPropagation();
+    tgWrap.classList.toggle('open');
+  }
+
+  document.addEventListener('click', () => tgWrap.classList.remove('open'));
+  document.getElementById('tgMenu').addEventListener('click', e => e.stopPropagation());
+</script>
 </body>
 </html>
