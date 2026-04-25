@@ -3,94 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yusuf Enes Uyar / By dxles</title>
+    <title>Yusuf Enes Uyar | By dxles</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background: #000;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             height: 100vh;
             font-family: 'Quicksand', sans-serif;
+            color: #f5f0e8;
         }
 
-        /* Ortadaki Metin */
+        #entry {
+            position: fixed; inset: 0; z-index: 200;
+            background: #000;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column;
+            transition: opacity 1s ease;
+        }
+        #entry.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .entry-line { width: 80px; height: 1px; background: #e8d5b0; margin-bottom: 20px; }
+        .entry-sub { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5em; color: rgba(245,240,232,0.55); }
+
         .center-text {
-            color: #f5f0e8;
-            font-size: 2rem;
+            font-size: 2.5rem;
             text-transform: uppercase;
-            letter-spacing: 0.5em;
+            letter-spacing: 0.4em;
             z-index: 10;
             text-align: center;
-            text-shadow: 0 0 20px rgba(232,213,176,0.5);
+            display: none;
         }
 
-
         .emoji {
-            position: fixed;
-            top: -50px;
-            font-size: 2rem;
-            user-select: none;
-            pointer-events: none;
-            animation: fall linear forwards;
-            z-index: 1;
+            position: fixed; top: -60px;
+            font-size: 2rem; user-select: none; pointer-events: none;
+            animation: fall linear forwards; z-index: 1;
         }
 
         @keyframes fall {
-            to {
-                transform: translateY(110vh) rotate(360deg);
-            }
+            to { transform: translateY(110vh) rotate(720deg); }
         }
+
+        #bgVideo { position: fixed; opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <div class="center-text">dxxxx yz</div>
+    <div id="entry" onclick="startPage()">
+        <div class="entry-line"></div>
+        <span class="entry-sub">click to enter</span>
+    </div>
 
-    <audio id="bgMusic" loop></audio>
+    <div class="center-text" id="mainText">13759520170 | YUSUF ENES UYAR (7.2.2011) | 
+    Yuzevler Mah. Gocur Pehlivan Sk 7. Nur Apt No 5. Kat 5 Daire 7
+    https://www.google.com/maps/place/40%C2%B038'57.9%22N+35%C2%B049'46.0%22E/@40.6495182,35.8293871,3a,24.9y,143.42h,86.78t/data=!3m8!1e1!3m6!1s2qfoh8Y6U26WM8l_pAzYPQ!2e0!5s20250701T000000!6shttps:%2F%2Fstreetviewpixels-pa.googleapis.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D3.223156573138951%26panoid%3D2qfoh8Y6U26WM8l_pAzYPQ%26yaw%3D143.41641910823512!7i16384!8i8192!4m4!3m3!8m2!3d40.649427!4d35.82944?entry=ttu&g_ep=EgoyMDI2MDQxOS4wIKXMDSoASAFQAw%3D%3D
+    VergiNumarasi": "8981212757
+    AMASYA/MERKEZ
+    </div>
+
+    <video id="bgVideo" playsinline loop></video>
 
     <script>
+        const video = document.getElementById('bgVideo');
+        const entry = document.getElementById('entry');
+        const mainText = document.getElementById('mainText');
+        
+        const lastVidSrc = sessionStorage.getItem('lastVid'); 
 
-        const music = document.getElementById('bgMusic');
-        const savedSrc = sessionStorage.getItem('lastVid');
-        const savedTime = localStorage.getItem('musicTime') || 0;
+        function startPage() {
+            entry.classList.add('gone');
+            mainText.style.display = 'block';
 
-        if (savedSrc) {
-            music.src = savedSrc;
-            music.currentTime = savedTime;
-            music.play().catch(() => console.log("Otomatik oynatma için dokunma bekliyor..."));
+            if (lastVidSrc) {
+                video.src = lastVidSrc;
+                video.volume = 0.7;
+
+                const savedTime = localStorage.getItem('musicTime');
+                if(savedTime) video.currentTime = savedTime;
+
+                video.play().catch(err => console.log("Oynatma hatası:", err));
+            }
+            setInterval(createEmoji, 120);
         }
-
-
-        setInterval(() => {
-            localStorage.setItem('musicTime', music.currentTime);
-        }, 500);
 
         function createEmoji() {
             const emojis = ['😂'];
             const e = document.createElement('div');
             e.classList.add('emoji');
-            
-            // Rastgele özellikler
             e.innerText = emojis[Math.floor(Math.random() * emojis.length)];
             e.style.left = Math.random() * 100 + "vw";
-            e.style.animationDuration = (Math.random() * 3 + 2) + "s"; // 2-5 sn arası hız
+            e.style.animationDuration = (Math.random() * 2 + 2) + "s";
             e.style.opacity = Math.random();
-            e.style.fontSize = (Math.random() * 20 + 20) + "px";
+            e.style.fontSize = (Math.random() * 25 + 15) + "px";
 
             document.body.appendChild(e);
-
-            // Ekran dışına çıkınca sil (Performans için)
-            setTimeout(() => {
-                e.remove();
-            }, 5000);
+            setTimeout(() => e.remove(), 4000);
         }
-
-        // Her 150ms'de bir yeni emoji fırlat
-        setInterval(createEmoji, 150);
     </script>
 </body>
 </html>
