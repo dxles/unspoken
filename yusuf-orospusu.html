@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yusuf Enes Uyar / By dxles</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        /* Ortadaki Metin */
+        .center-text {
+            color: #f5f0e8;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5em;
+            z-index: 10;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(232,213,176,0.5);
+        }
+
+
+        .emoji {
+            position: fixed;
+            top: -50px;
+            font-size: 2rem;
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear forwards;
+            z-index: 1;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="center-text">dxxxx yz</div>
+
+    <audio id="bgMusic" loop></audio>
+
+    <script>
+
+        const music = document.getElementById('bgMusic');
+        const savedSrc = sessionStorage.getItem('lastVid');
+        const savedTime = localStorage.getItem('musicTime') || 0;
+
+        if (savedSrc) {
+            music.src = savedSrc;
+            music.currentTime = savedTime;
+            music.play().catch(() => console.log("Otomatik oynatma için dokunma bekliyor..."));
+        }
+
+
+        setInterval(() => {
+            localStorage.setItem('musicTime', music.currentTime);
+        }, 500);
+
+        function createEmoji() {
+            const emojis = ['😂'];
+            const e = document.createElement('div');
+            e.classList.add('emoji');
+            
+            // Rastgele özellikler
+            e.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            e.style.left = Math.random() * 100 + "vw";
+            e.style.animationDuration = (Math.random() * 3 + 2) + "s"; // 2-5 sn arası hız
+            e.style.opacity = Math.random();
+            e.style.fontSize = (Math.random() * 20 + 20) + "px";
+
+            document.body.appendChild(e);
+
+            // Ekran dışına çıkınca sil (Performans için)
+            setTimeout(() => {
+                e.remove();
+            }, 5000);
+        }
+
+        // Her 150ms'de bir yeni emoji fırlat
+        setInterval(createEmoji, 150);
+    </script>
+</body>
+</html>
